@@ -25,7 +25,8 @@ model Resume {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applications JobApplication[]
+  applications JobApplication[] @relation("ResumeUsedForAnalysis")
+  tailoredForApplications JobApplication[] @relation("TailoredResume")
 
   @@index([isMaster])
 }
@@ -40,7 +41,10 @@ model JobApplication {
   status      ApplicationStatus @default(DRAFT)
 
   resumeId    String?
-  resume      Resume?  @relation(fields: [resumeId], references: [id])
+  resume      Resume?  @relation("ResumeUsedForAnalysis", fields: [resumeId], references: [id])
+
+  tailoredResumeId String?
+  tailoredResume   Resume? @relation("TailoredResume", fields: [tailoredResumeId], references: [id])
 
   analyses    MatchAnalysis[]
 

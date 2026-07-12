@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { StatusPill } from "@/components/StatusPill";
 import { RunAnalysisButton } from "@/components/RunAnalysisButton";
 import { AnalysisPanel } from "@/components/AnalysisPanel";
 import { SuggestionsPanel } from "@/components/SuggestionsPanel";
+import { CreateTailoredResumeButton } from "@/components/CreateTailoredResumeButton";
 import type { Suggestion } from "@/types/analysis";
 
 export default async function JobDetailPage({
@@ -76,6 +78,31 @@ export default async function JobDetailPage({
         ) : (
           <div className="border border-dashed border-border rounded-card p-6 text-center text-sm text-ink-400">
             Run an analysis to get suggestions.
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-sm font-medium mb-3">Tailored resume</h2>
+        {job.tailoredResumeId ? (
+          <div className="flex items-center justify-between border border-border rounded-card p-4 bg-surface">
+            <p className="text-sm text-ink-600">
+              A tailored copy exists for this job.
+            </p>
+            <Link
+              href={`/resume/${job.tailoredResumeId}`}
+              className="text-sm font-medium text-accent-strong hover:underline"
+            >
+              View tailored resume →
+            </Link>
+          </div>
+        ) : (
+          <div className="border border-dashed border-border rounded-card p-4">
+            <p className="text-sm text-ink-400 mb-3">
+              Once you've marked suggestions applied above, generate a
+              tailored copy of your resume for this job.
+            </p>
+            <CreateTailoredResumeButton jobId={job.id} />
           </div>
         )}
       </div>
