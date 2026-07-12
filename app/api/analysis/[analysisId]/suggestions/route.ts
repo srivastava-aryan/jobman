@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import type { Suggestion } from "@/types/analysis";
+import { SuggestionListSchema } from "@/lib/schemas";
 
 const ToggleSchema = z.object({
   suggestionId: z.string(),
@@ -30,8 +30,17 @@ export async function PATCH(
     return NextResponse.json({ error: "Analysis not found" }, { status: 404 });
   }
 
-  const suggestions = analysis.suggestions as unknown as Suggestion[];
-  const updated = suggestions.map((s) =>
+  const suggestionsResult = SuggestionListSchema.safeParse(
+    analysis.suggestions
+  );
+  if (!suggestionsResult.success) {
+    return NextResponse.json(
+      { error: "Stored suggestions are malformed — re-run analysis." },
+      { status: 500 }
+    );
+  }
+
+  const updated = suggestionsResult.data.map((s) =>
     s.id === parsed.data.suggestionId
       ? { ...s, applied: parsed.data.applied }
       : s

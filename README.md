@@ -33,8 +33,10 @@ npm install
 
 # copy and fill in
 cp .env.example .env
-# DATABASE_URL -> your Postgres connection string (Supabase/Neon/local)
+# DATABASE_URL   -> your Postgres connection string (Supabase/Neon/local)
 # GEMINI_API_KEY -> from Google AI Studio
+# APP_USERNAME / APP_PASSWORD -> Basic Auth credentials. Required before
+#   deploying anywhere public — the app is unauthenticated without them.
 
 npx prisma migrate dev --name init
 npx prisma generate
@@ -43,6 +45,22 @@ npm run dev
 ```
 
 Visit `http://localhost:3000`.
+
+If you're pulling in changes from an earlier version of this project (before
+the tailored-resume feature), run one more migration:
+
+```bash
+npx prisma migrate dev --name add_tailored_resume
+```
+
+## Security & data integrity notes
+
+- All routes sit behind `middleware.ts` Basic Auth once `APP_USERNAME`/`APP_PASSWORD` are set — this is a single-user tool, not multi-tenant, so one shared credential gating everything is the right shape rather than per-route auth checks.
+- LLM responses (JD extraction, semantic scoring, suggestions, tailoring) are validated against Zod schemas in `lib/schemas.ts` before being trusted, with one automatic retry on a malformed or failed response.
+- Resume JSON read from the DB goes through `toResumeContent()` (in `lib/resume.ts`), which validates with Zod and degrades gracefully per-field instead of crashing on unexpected shape.
+- Prompts explicitly instruct the model to treat job descriptions and resume content as data, not instructions — a basic defense against prompt injection via pasted JD text.
+- Creating a tailored resume and linking it to a job happens inside a single `prisma.$transaction`, so a failure partway through can't leave an orphaned resume record.
+- `Resume` → `JobApplication` relations use `onDelete: SetNull` — deleting a resume never cascades into deleting job applications or blocks on a foreign key error.
 
 ## Project structure
 

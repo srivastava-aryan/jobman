@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function RunAnalysisButton({
-  jobId,
-  hasAnalysis,
-}: {
-  jobId: string;
-  hasAnalysis: boolean;
-}) {
+export function CreateTailoredResumeButton({ jobId }: { jobId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,15 +12,17 @@ export function RunAnalysisButton({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/analyze/${jobId}`, { method: "POST" });
+      const res = await fetch(`/api/jobs/${jobId}/tailor`, {
+        method: "POST",
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? "Analysis failed");
+        throw new Error(body.error ?? "Could not create tailored resume.");
       }
-      router.refresh();
+      const resume = await res.json();
+      router.push(`/resume/${resume.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setLoading(false);
     }
   }
@@ -37,9 +33,9 @@ export function RunAnalysisButton({
         type="button"
         onClick={run}
         disabled={loading}
-        className="text-sm font-medium bg-accent text-white rounded-md px-4 py-2 hover:bg-accent-strong transition-colors disabled:opacity-50"
+        className="text-sm font-medium border border-accent text-accent-strong rounded-md px-4 py-2 hover:bg-accent-soft transition-colors disabled:opacity-50"
       >
-        {loading ? "Analyzing..." : hasAnalysis ? "Re-analyze" : "Run analysis"}
+        {loading ? "Generating..." : "Create tailored resume"}
       </button>
       {error && (
         <p className="text-sm text-danger mt-2" role="alert" aria-live="polite">

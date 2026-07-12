@@ -12,9 +12,13 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 export function ResumeEditor({
   resumeId,
   initial,
+  title = "Master Resume",
+  subtitle = "Kept as structured data so match scoring and suggestions can target specific projects and bullets, not just a text blob.",
 }: {
   resumeId: string;
   initial: ResumeContent;
+  title?: string;
+  subtitle?: string;
 }) {
   const [content, setContent] = useState<ResumeContent>(initial);
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -45,13 +49,10 @@ export function ResumeEditor({
   return (
     <div className="max-w-3xl">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-lg font-semibold">Master Resume</h1>
+        <h1 className="text-lg font-semibold">{title}</h1>
         <SaveButton state={saveState} onClick={handleSave} />
       </div>
-      <p className="text-sm text-ink-400 mb-8">
-        Kept as structured data so match scoring and suggestions can target
-        specific projects and bullets, not just a text blob.
-      </p>
+      <p className="text-sm text-ink-400 mb-8">{subtitle}</p>
 
       <Section title="Summary">
         <textarea
