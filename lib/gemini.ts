@@ -1,4 +1,4 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatGoogle } from "@langchain/google";
 
 if (!process.env.GEMINI_API_KEY) {
   console.warn("GEMINI_API_KEY is not set — analysis calls will fail.");
@@ -6,9 +6,9 @@ if (!process.env.GEMINI_API_KEY) {
 
 // Single shared instance. Low temperature since we want consistent,
 // grounded extraction/scoring, not creative variation.
-export const geminiModel = new ChatGoogleGenerativeAI({
+export const geminiModel = new ChatGoogle({
   apiKey: process.env.GEMINI_API_KEY,
-  model: "gemini-2.0-flash",
+  model: "gemini-3.1-flash-lite",
   temperature: 0.2,
 });
 
