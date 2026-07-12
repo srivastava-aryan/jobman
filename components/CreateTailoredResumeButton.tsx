@@ -19,10 +19,10 @@ export function CreateTailoredResumeButton({ jobId }: { jobId: string }) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Could not create tailored resume.");
       }
-      router.refresh();
+      const resume = await res.json();
+      router.push(`/resume/${resume.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
       setLoading(false);
     }
   }
@@ -37,7 +37,11 @@ export function CreateTailoredResumeButton({ jobId }: { jobId: string }) {
       >
         {loading ? "Generating..." : "Create tailored resume"}
       </button>
-      {error && <p className="text-sm text-danger mt-2">{error}</p>}
+      {error && (
+        <p className="text-sm text-danger mt-2" role="alert" aria-live="polite">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

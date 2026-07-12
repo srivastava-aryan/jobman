@@ -41,7 +41,11 @@ export function RunAnalysisButton({
       >
         {loading ? "Analyzing..." : hasAnalysis ? "Re-analyze" : "Run analysis"}
       </button>
-      {error && <p className="text-sm text-danger mt-2">{error}</p>}
+      {error && (
+        <p className="text-sm text-danger mt-2" role="alert" aria-live="polite">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

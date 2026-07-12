@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getOrCreateMasterResume } from "@/lib/resume";
+import { getOrCreateMasterResume, toResumeContent } from "@/lib/resume";
 import { runAnalysis, READY_THRESHOLD } from "@/lib/analysis/run";
-import type {
-  ResumeContent,
-  ProjectEntry,
-  ExperienceEntry,
-  EducationEntry,
-} from "@/types/resume";
 
 export async function POST(
   req: NextRequest,
@@ -22,13 +16,7 @@ export async function POST(
   }
 
   const resumeRecord = await getOrCreateMasterResume();
-  const resume: ResumeContent = {
-    summary: resumeRecord.summary ?? "",
-    skills: (resumeRecord.skills as string[]) ?? [],
-    projects: (resumeRecord.projects as unknown as ProjectEntry[]) ?? [],
-    experience: (resumeRecord.experience as unknown as ExperienceEntry[]) ?? [],
-    education: (resumeRecord.education as unknown as EducationEntry[]) ?? [],
-  };
+  const resume = toResumeContent(resumeRecord);
 
   await prisma.jobApplication.update({
     where: { id: job.id },

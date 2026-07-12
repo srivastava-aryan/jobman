@@ -41,10 +41,10 @@ model JobApplication {
   status      ApplicationStatus @default(DRAFT)
 
   resumeId    String?
-  resume      Resume?  @relation("ResumeUsedForAnalysis", fields: [resumeId], references: [id])
+  resume      Resume?  @relation("ResumeUsedForAnalysis", fields: [resumeId], references: [id], onDelete: SetNull)
 
   tailoredResumeId String?
-  tailoredResume   Resume? @relation("TailoredResume", fields: [tailoredResumeId], references: [id])
+  tailoredResume   Resume? @relation("TailoredResume", fields: [tailoredResumeId], references: [id], onDelete: SetNull)
 
   analyses    MatchAnalysis[]
 

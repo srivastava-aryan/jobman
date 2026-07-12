@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { StatusPill } from "@/components/StatusPill";
 import { RunAnalysisButton } from "@/components/RunAnalysisButton";
 import { AnalysisPanel } from "@/components/AnalysisPanel";
 import { SuggestionsPanel } from "@/components/SuggestionsPanel";
 import { CreateTailoredResumeButton } from "@/components/CreateTailoredResumeButton";
-import type { Suggestion } from "@/types/analysis";
+import { SuggestionListSchema } from "@/lib/schemas";
 
 export default async function JobDetailPage({
   params,
@@ -26,6 +27,18 @@ export default async function JobDetailPage({
   if (!job) notFound();
 
   const latest = job.analyses[0];
+  const suggestionsResult = latest
+    ? SuggestionListSchema.safeParse(latest.suggestions)
+    : null;
+  const suggestions = suggestionsResult?.success ? suggestionsResult.data : [];
+
+  const stringArray = z.array(z.string());
+  const matchedSkills = latest
+    ? stringArray.safeParse(latest.matchedSkills)
+    : null;
+  const missingSkills = latest
+    ? stringArray.safeParse(latest.missingSkills)
+    : null;
 
   return (
     <div className="max-w-3xl">
@@ -46,8 +59,8 @@ export default async function JobDetailPage({
             overallScore={latest.overallScore}
             hardMatchScore={latest.hardMatchScore}
             semanticScore={latest.semanticScore}
-            matchedSkills={latest.matchedSkills as string[]}
-            missingSkills={latest.missingSkills as string[]}
+            matchedSkills={matchedSkills?.success ? matchedSkills.data : []}
+            missingSkills={missingSkills?.success ? missingSkills.data : []}
           />
         ) : (
           <div className="border border-dashed border-border rounded-card p-6 text-center text-sm text-ink-400 mb-4">
@@ -73,7 +86,7 @@ export default async function JobDetailPage({
         {latest ? (
           <SuggestionsPanel
             analysisId={latest.id}
-            suggestions={latest.suggestions as unknown as Suggestion[]}
+            suggestions={suggestions}
           />
         ) : (
           <div className="border border-dashed border-border rounded-card p-6 text-center text-sm text-ink-400">
