@@ -1,14 +1,22 @@
-export default function ResumePage() {
-  return (
-    <div className="max-w-3xl">
-      <h1 className="text-lg font-semibold mb-1">Master Resume</h1>
-      <p className="text-sm text-ink-400 mb-6">
-        The structured resume editor lives here — skills, projects, and
-        experience as data, not just a text blob. Coming next.
-      </p>
-      <div className="border border-dashed border-border rounded-card p-6 text-center text-sm text-ink-400">
-        Resume editor placeholder
-      </div>
-    </div>
-  );
+import { getOrCreateMasterResume } from "@/lib/resume";
+import { ResumeEditor } from "@/components/ResumeEditor";
+import type {
+  ProjectEntry,
+  ExperienceEntry,
+  EducationEntry,
+  ResumeContent,
+} from "@/types/resume";
+
+export default async function ResumePage() {
+  const resume = await getOrCreateMasterResume();
+
+  const initial: ResumeContent = {
+    summary: resume.summary ?? "",
+    skills: (resume.skills as string[]) ?? [],
+    projects: (resume.projects as unknown as ProjectEntry[]) ?? [],
+    experience: (resume.experience as unknown as ExperienceEntry[]) ?? [],
+    education: (resume.education as unknown as EducationEntry[]) ?? [],
+  };
+
+  return <ResumeEditor resumeId={resume.id} initial={initial} />;
 }
