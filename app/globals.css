@@ -23,6 +23,24 @@ body {
   background-color: #e7f0ea;
 }
 
+.input {
+  width: 100%;
+  border: 1px solid #e2e4df;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #ffffff;
+}
+.input:focus {
+  outline: none;
+  border-color: #2f6f4f;
+  box-shadow: 0 0 0 3px #e7f0ea;
+}
+.input:disabled {
+  background: #f6f7f5;
+  color: #9aa096;
+}
+
 :focus-visible {
   outline: 2px solid #2f6f4f;
   outline-offset: 2px;
