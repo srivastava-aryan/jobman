@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cleanTag, dedupeTags } from "@/lib/normalize";
 
 export function TagInput({
   value,
@@ -14,9 +15,9 @@ export function TagInput({
   const [draft, setDraft] = useState("");
 
   function commit() {
-    const trimmed = draft.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    const cleaned = cleanTag(draft);
+    if (cleaned) {
+      onChange(dedupeTags([...value, cleaned]));
     }
     setDraft("");
   }

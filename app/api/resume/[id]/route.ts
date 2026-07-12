@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { dedupeTags } from "@/lib/normalize";
 
 const ProjectSchema = z.object({
   id: z.string(),
@@ -51,14 +52,27 @@ export async function PUT(
     );
   }
 
+  const normalized = {
+    ...parsed.data,
+    skills: dedupeTags(parsed.data.skills),
+    projects: parsed.data.projects.map((p) => ({
+      ...p,
+      techStack: dedupeTags(p.techStack),
+    })),
+    experience: parsed.data.experience.map((e) => ({
+      ...e,
+      techStack: dedupeTags(e.techStack),
+    })),
+  };
+
   const updated = await prisma.resume.update({
     where: { id: params.id },
     data: {
-      summary: parsed.data.summary,
-      skills: parsed.data.skills,
-      projects: parsed.data.projects,
-      experience: parsed.data.experience,
-      education: parsed.data.education,
+      summary: normalized.summary,
+      skills: normalized.skills,
+      projects: normalized.projects,
+      experience: normalized.experience,
+      education: normalized.education,
     },
   });
 
