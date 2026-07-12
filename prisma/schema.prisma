@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A single resume version. You'll likely only ever have one "active" one,
+// but keeping it versioned lets you snapshot before tailoring for a specific job.
+model Resume {
+  id        String   @id @default(cuid())
+  label     String   @default("Master Resume") // e.g. "Master Resume", "Tailored - Pantheon SWE"
+  isMaster  Boolean  @default(false)
+
+  // Structured content — this is what the matching engine reads.
+  // Kept as JSON so the shape can evolve without migrations for every field.
+  summary   String?
+  skills    Json     // string[] of skill/tech tags, e.g. ["TypeScript", "LangChain", "Prisma"]
+  projects  Json      // ProjectEntry[] — see /types/resume.ts
+  experience Json     // ExperienceEntry[]
+  education Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications JobApplication[]
+
+  @@index([isMaster])
+}
+
+model JobApplication {
+  id          String   @id @default(cuid())
+  company     String
+  role        String
+  source      String?  // "LinkedIn", "Naukri", "Wellfound", pasted manually, etc.
+  jdRaw       String   // the pasted job description text
+
+  status      ApplicationStatus @default(DRAFT)
+
+  resumeId    String?
+  resume      Resume?  @relation(fields: [resumeId], references: [id])
+
+  analyses    MatchAnalysis[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
+
+model MatchAnalysis {
+  id               String   @id @default(cuid())
+  jobApplicationId String
+  jobApplication   JobApplication @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+
+  // Extracted from the JD by the LLM
+  requiredSkills   Json     // string[]
+  niceToHaveSkills Json     // string[]
+
+  // Computed against the resume at analysis time
+  matchedSkills    Json     // string[]
+  missingSkills    Json     // string[]
+
+  hardMatchScore   Float    // exact/synonym skill overlap, 0-100
+  semanticScore    Float    // LLM judgment of contextual fit, 0-100
+  overallScore     Float    // weighted combined score, 0-100
+
+  suggestions      Json     // Suggestion[] — see /types/analysis.ts
+
+  createdAt        DateTime @default(now())
+
+  @@index([jobApplicationId])
+}
+
+enum ApplicationStatus {
+  DRAFT
+  ANALYZING
+  READY
+  APPLIED
+  INTERVIEWING
+  REJECTED
+  OFFER
+}

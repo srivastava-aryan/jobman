@@ -1,0 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f6f7f5;
+  color: #1b1f1d;
+}
+
+/* score chip / gauge numerals should always read as data, not prose */
+.data-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background-color: #e7f0ea;
+}
+
+:focus-visible {
+  outline: 2px solid #2f6f4f;
+  outline-offset: 2px;
+}
