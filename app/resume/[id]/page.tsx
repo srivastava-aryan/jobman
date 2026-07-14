@@ -18,6 +18,7 @@ export default async function ResumeByIdPage({
       resumeId={resume.id}
       initial={initial}
       title={resume.label}
+      showUpload={resume.isMaster}
       subtitle={
         resume.isMaster
           ? "Kept as structured data so match scoring and suggestions can target specific projects and bullets, not just a text blob."

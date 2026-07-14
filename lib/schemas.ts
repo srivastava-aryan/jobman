@@ -66,3 +66,22 @@ export const SuggestionSchema = z.object({
 });
 
 export const SuggestionListSchema = z.array(SuggestionSchema);
+
+// "Draft" variants omit `id` — used when the LLM is generating new resume
+// content (e.g. from an uploaded PDF) where we assign ids ourselves after
+// validation, rather than trusting the model to invent well-formed unique ids.
+export const ProjectEntryDraftSchema = ProjectEntrySchema.omit({ id: true });
+export const ExperienceEntryDraftSchema = ExperienceEntrySchema.omit({
+  id: true,
+});
+export const EducationEntryDraftSchema = EducationEntrySchema.omit({
+  id: true,
+});
+
+export const ResumeContentDraftSchema = z.object({
+  summary: z.string(),
+  skills: z.array(z.string()),
+  projects: z.array(ProjectEntryDraftSchema),
+  experience: z.array(ExperienceEntryDraftSchema),
+  education: z.array(EducationEntryDraftSchema),
+});
