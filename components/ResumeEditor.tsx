@@ -6,6 +6,7 @@ import { TagInput } from "@/components/TagInput";
 import { ProjectsEditor } from "@/components/ProjectsEditor";
 import { ExperienceEditor } from "@/components/ExperienceEditor";
 import { EducationEditor } from "@/components/EducationEditor";
+import { ResumeUpload } from "@/components/ResumeUpload";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -14,14 +15,21 @@ export function ResumeEditor({
   initial,
   title = "Master Resume",
   subtitle = "Kept as structured data so match scoring and suggestions can target specific projects and bullets, not just a text blob.",
+  showUpload = true,
 }: {
   resumeId: string;
   initial: ResumeContent;
   title?: string;
   subtitle?: string;
+  showUpload?: boolean;
 }) {
   const [content, setContent] = useState<ResumeContent>(initial);
   const [saveState, setSaveState] = useState<SaveState>("idle");
+
+  const hasExistingContent =
+    content.skills.length > 0 ||
+    content.projects.length > 0 ||
+    content.experience.length > 0;
 
   function patch<K extends keyof ResumeContent>(
     key: K,
@@ -53,6 +61,16 @@ export function ResumeEditor({
         <SaveButton state={saveState} onClick={handleSave} />
       </div>
       <p className="text-sm text-ink-400 mb-8">{subtitle}</p>
+
+      {showUpload && (
+        <ResumeUpload
+          hasExistingContent={hasExistingContent}
+          onParsed={(parsed) => {
+            setContent(parsed);
+            setSaveState("idle");
+          }}
+        />
+      )}
 
       <Section title="Summary">
         <textarea
